@@ -47,22 +47,32 @@
             <p>Describes the app to the browser, allowing it to provide a more native & immersive experience</p>
           </section>
           <section>
+            index.html
+            <pre><code data-trim>
+<link rel="manifest" href="/manifest.json">
+            </code></pre>
+            manifest.json
             <pre><code data-trim>
 {
   "short_name": "IIWMD",
   "name": "Is It Wednesday My Dudes?",
-  "description": "Answer that important question",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "192x192",
+  "description": "Answer that all important question",
+  "theme_color": "#D4AE9B",
+  "icons": [{
+      "src": "isitwednesday.png",
+      "sizes": "48x48 72x72 96x96 128x128 256x256",
       "type": "image/png"
-    }
-  ],
+  }],
   "start_url": "./",
   "display": "standalone"
 }
             </code></pre>
+          </section>
+
+          <section>
+            <video>
+              <source src="vid/add-to-homescreen.mp4" type="video/mp4">
+            </video>
           </section>
         </section>
 
@@ -78,7 +88,6 @@
           <section>
             <h2>Event-driven</h2>
             <p>Service workers must run asynchronously, ie. be non-blocking</p>
-            <p>Unfortunately this means they look disgusting</p>
           </section>
           <section>
             <p>Tell the browser about your service worker</p>
@@ -94,7 +103,7 @@ if ('serviceWorker' in navigator) {
             <p>Cache offline files in the 'install' event</p>
             <pre><code data-trim>
 self.addEventListener('install', event => {
-  event.waitUntil( // provide a promise to wait for
+  event.waitUntil(
     caches.open('static')
       .then(cache => cache.addAll([
         'index.html',
@@ -134,6 +143,39 @@ self.addEventListener('fetch', event => {
           </section>
         </section>
 
+        <section>
+          <section>
+            <h1>Why?</h1>
+          </section>
+          <section>
+            <h2>Works offline</h2>
+            <p>If the index and vital resources are cached, your site works offline</p>
+          </section>
+          <section>
+            <h2>Speedy</h2>
+            <p>People hate slow sites - yours will work even on lie-fi</h2>
+          </section>
+          <section>
+            <h2>Immersive</h2>
+            <p>Easy access from the home screen</p>
+            <img src="img/add-to-home-screen.png" alt="Add to home screen banner in Chrome">
+            <p>Users more likely to remember and re-visit</p>
+            <p>Native feel</p>
+          </section>
+        </section>
+
+        <section>
+          <h2>Amazing demo app</h2>
+          <a href="https://isitwednesdaymydud.es" target="_blank">isitwednesdaymydud.es</a>
+        </section>
+
+        <section>
+          <h2>Thanks</h2>
+          <p>and questions I suppose</p>
+          <small style="font-size: 0.6rem">I probably don't know though sorry</small>
+          <p>@callummr</p>
+        </section>
+
       </div>
     </div>
 
@@ -152,6 +194,32 @@ self.addEventListener('fetch', event => {
           { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
         ]
       });
+    </script>
+
+    <script>
+      Reveal.addEventListener('slidechanged', ({ currentSlide }) => {
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+          video.pause();
+          video.currentTime = 0;
+        })
+
+        if (currentSlide.querySelector('video')) {
+          setTimeout(() => currentSlide.querySelector('video').play(), 1000);
+        }
+      })
+
+      const fitVideosToSections = () => {
+        const slidesHeight = document.querySelector('.slides').clientHeight;
+        const vidHeight = (slidesHeight - 40) * 0.8;
+        Array.from(document.querySelectorAll('video'))
+          .forEach(video => {
+            video.style.maxHeight = `${vidHeight}px`;
+          })
+      }
+
+      window.addEventListener('resize', fitVideosToSections);
+      window.addEventListener('load', fitVideosToSections);
     </script>
   </body>
 </html>
