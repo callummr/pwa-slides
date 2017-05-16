@@ -1,54 +1,53 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>reveal.js</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/moon.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/moon.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
 
-				<section>
-					<h1>Progressive<br/>
-						Web
-						Apps
-					</h1>
-				</section>
+        <section>
+          <h1>Progressive<br/>
+            Web
+            Apps
+          </h1>
+        </section>
 
-				<section>
-					<h2>What is a PWA?</h2>
-					<ul>
-						<li>Reliable</li>
-						<li>Fast</li>
-						<li>Engaging</li>
-					</ul>
-				</section>
+        <section>
+          <h2>What is a PWA?</h2>
+          <ul>
+            <li>Reliable</li>
+            <li>Fast</li>
+            <li>Engaging</li>
+          </ul>
+        </section>
 
-				<section>
-					<section>
-						<h2>App Manifest</h2>
-						<p>Describes the app to the browser, allowing it to provide a more native & immersive experience</p>
-					</section>
-					<section>
-						<pre>
-							<code data-trim>
+        <section>
+          <section>
+            <h2>App Manifest</h2>
+            <p>Describes the app to the browser, allowing it to provide a more native & immersive experience</p>
+          </section>
+          <section>
+            <pre><code data-trim>
 {
   "short_name": "IIWMD",
   "name": "Is It Wednesday My Dudes?",
@@ -63,74 +62,96 @@
   "start_url": "./",
   "display": "standalone"
 }
-							</code>
-						</pre>
-					</section>
-				</section>
+            </code></pre>
+          </section>
+        </section>
 
-				<section>
-					<section>
-						<h2>Service Workers</h2>
-						<p>Script that installs itself in the background and caches anything needed for your app to function offline</p>
-					</section>
-					<section>
-						<h2>Separate scope</h2>
-						<p>Service workers run outside of your site - essentially a proxy between your app and the Internet</p>
-					</section>
-					<section>
-						<h2>Event-driven</h2>
-						<p>Service workers must run asynchronously, ie. be non-blocking</p>
-					</section>
-					<section>
-						<p>Tell the browser about your service worker</p>
-						<pre><code data-trim>
+        <section>
+          <section>
+            <h2>Service Workers</h2>
+            <p>Script that installs itself in the background and caches anything needed for your app to function offline</p>
+          </section>
+          <section>
+            <h2>Separate scope</h2>
+            <p>Service workers run outside of your site - essentially a proxy between your app and the Internet</p>
+          </section>
+          <section>
+            <h2>Event-driven</h2>
+            <p>Service workers must run asynchronously, ie. be non-blocking</p>
+            <p>Unfortunately this means they look disgusting</p>
+          </section>
+          <section>
+            <p>Tell the browser about your service worker</p>
+            <pre><code data-trim>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/serviceWorker.js', {
     scope: '/'
   });
 }
-					</code></pre>
-					</section>
-					<section>
-						<p>Cache offline files in the 'install' event</p>
-						<pre><code data-trim>
+          </code></pre>
+          </section>
+          <section>
+            <p>Cache offline files in the 'install' event</p>
+            <pre><code data-trim>
 self.addEventListener('install', event => {
   event.waitUntil( // provide a promise to wait for
     caches.open('static')
       .then(cache => cache.addAll([
+        'index.html',
         '/js/main.js',
         '/css/styles.css',
       ])
   )
 })
-						</code></pre>
-					</section>
-					<section>
-						<p>Intercept network requests and provide cached responses</p>
-						<pre><code data-trim>
+            </code></pre>
+          </section>
+          <section>
+            <p>Intercept network requests and provide cached resources</p>
+            <pre><code data-trim>
+self.addEventListener('fetch', event => {
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.open('static').then(cache => (
+        cache.match(event.request).then(response => (
+          response || fetch(event.request).then(response => {
+            cache.put(event.request, response.clone());
+            return response;
+          })
+        ))
+      ))
+    );
+  }
+});
+            </code></pre>
+          </section>
+          <section>
+            <h2>Strategies</h2>
+            <ul>
+              <li>Return cached from list</li>
+              <li>Return cached if available, else fetch &amp; cache</li>
+              <li>Return cached if available <em>while</em> fetching (stale-while-revalidate)</li>
+            </ul>
+          </section>
+        </section>
 
-						</code></pre>
-					</section>
-				</section>
+      </div>
+    </div>
 
-			</div>
-		</div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
-
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
 </html>
